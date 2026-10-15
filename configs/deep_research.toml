@@ -1,0 +1,12 @@
+[mage]
+provider = "openai"
+model = "gpt-4o"
+temperature = 0.2
+mode = "deep"
+enable_memory = true
+enable_memory_research = true
+enable_web_research = true
+web_search_provider = "tavily"
+memory_recall_top_k = 5
+memory_relevance_threshold = 0.4
+cold_start_candidates = 3

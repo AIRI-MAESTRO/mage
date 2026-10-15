@@ -1,0 +1,7 @@
+[mage]
+mode = "deep"
+model = "gpt-4o"
+temperature = 0.2
+enable_memory = false
+enable_memory_research = false
+enable_web_research = false

@@ -1,0 +1,39 @@
+# MAGE — recommended open-weight models per pipeline stage.
+# Audit Part 5 / WP-10; landscape ~June 2026. Generator and judge are kept in
+# DIFFERENT model families to avoid self-preference / reward hacking (see P-5).
+# Provider IDs are OpenRouter-style — swap to your own endpoint as needed.
+#
+# Apply the overrides:
+#   from mmar_mage.models_preset import load_models_preset
+#   preset = load_models_preset()
+#   cfg = MAGEConfig(..., stage_llm_overrides=preset["stage_llm_overrides"])
+# Feed pricing to the dry-run cost estimator:
+#   estimate_chain_cost(chain, pricing=preset["pricing"], default_model="deepseek/deepseek-v4-pro")
+
+stage_llm_overrides:
+  # Reasoning-critical, short output → DeepSeek V4 Pro
+  domain_analysis:     {model: "deepseek/deepseek-v4-pro", temperature: 0.3}
+  step_planning:       {model: "deepseek/deepseek-v4-pro", temperature: 0.4}
+  topology_selection:  {model: "deepseek/deepseek-v4-pro", temperature: 0.3}
+  dag_building:        {model: "deepseek/deepseek-v4-pro", temperature: 0.3}
+  # Output-heavy JSON, needs non-thinking → DeepSeek V4 Flash
+  step_describing:     {model: "deepseek/deepseek-v4-flash", temperature: 0.5}
+  suggested_naming:    {model: "deepseek/deepseek-v4-flash", temperature: 0.5}
+  plan_scoring:        {model: "deepseek/deepseek-v4-flash", temperature: 0.2}
+  # Code + repair-loop → Qwen3-Coder
+  tool_implementation: {model: "qwen/qwen3-coder", temperature: 0.2}
+  skill_synthesis:     {model: "qwen/qwen3-coder", temperature: 0.2}
+  # Judge / grader — DIFFERENT family from the generator (anti self-preference, P-5)
+  chain_grading:       {model: "moonshotai/kimi-k2.6", temperature: 0.0}
+  chain_verification:  {model: "moonshotai/kimi-k2.6", temperature: 0.0}
+  # Evolve mutator (diagnose + one diff)
+  evolve_repair:       {model: "deepseek/deepseek-v4-pro", temperature: 0.6}
+  evolve_reflective:   {model: "deepseek/deepseek-v4-pro", temperature: 0.7}
+
+# {model: [input_usd_per_million, output_usd_per_million]}.
+# cost.estimate_chain_cost wants per-1k tokens — load_models_preset divides by 1000.
+pricing_per_million_usd:
+  deepseek/deepseek-v4-pro:   [0.27, 0.435]
+  deepseek/deepseek-v4-flash: [0.14, 0.28]
+  qwen/qwen3-coder:           [0.20, 0.80]
+  moonshotai/kimi-k2.6:       [0.60, 0.74]

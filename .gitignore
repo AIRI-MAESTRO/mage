@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code (local config, runtime locks, worktrees)
+.claude/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ruff
+.ruff_cache/
+
+# mypy
+.mypy_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+__MACOSX/
+
+# Local archives / snapshots — use `make package` (→ dist/) for a clean source cut.
+# The 09.06 archive accidentally bundled .venv (55 MB) + __MACOSX; keep raw archives out.
+*.zip
+*.tar.gz
+*.tgz
+
+# Examples output
+examples/**/result.json
+
+# Environment
+.env
+.env.local
+experiments/baselines/_staged_data/

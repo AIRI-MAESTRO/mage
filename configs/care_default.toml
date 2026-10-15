@@ -1,0 +1,66 @@
+# CARE-default — the recommended preset CARE wires for new projects.
+#
+# Deep mode, OpenAI-compatible provider, every §7 CARE serialization
+# field enabled so the chain is library-ready and re-runnable from the
+# very first generation. Memory is OFF here: most CARE users opt in to
+# persistence later; the chain dict + bundle are still produced.
+#
+# Toggle the streaming + retry visibility hooks (§3) for CARE's TUI.
+# Keep ecosystem-save flags (§5) and intermediate-artifact persistence
+# (§4 P2) OFF by default — flip them on when the user opts in to
+# "save my agents" in CARE's settings screen.
+
+[mage]
+provider = "openai"
+model = "gpt-4o"
+temperature = 0.2
+mode = "deep"
+
+# §3 — TUI-friendly streaming + retry visibility
+enable_streaming = true
+
+# P-7 / T9 — schema-guided decoding for structured stages (domain / planning /
+# dag) where the provider supports it (OpenAI, OpenRouter structured outputs,
+# vLLM guided decoding). Cuts JSON-parse retries on weak models; if the runtime
+# model can't honor json_schema the call degrades to json_object automatically.
+use_schema_constrained_output = true
+
+# T38/T10/T11 — quality gates + replan made explicit. replan is ON (T10): a tool-step
+# failure rolls back to an auto-marked checkpoint and replans. step-critique is ON but
+# SCOPED to the risky step types (T11) — the cheap verifier checks only tool /
+# structured_output steps (where run 096 broke), not the whole chain; full
+# chain-verification stays OFF (care_research is the thorough tier).
+enable_replan_generation = true
+enable_step_critique = true
+step_critique_step_types = ["tool", "structured_output"]
+enable_chain_verification = false
+
+# T44 — auto step-describe: OpenRouter (deepseek-flash etc.) isn't trusted for a
+# long batch JSON reply, so a long chain is described one step per call.
+step_describe_mode = "auto"
+
+# T13 — fast-path: a genuinely simple query (complexity="simple", <=2 steps) skips
+# the 7-stage deep pipeline for a single fast-mode call (deep spent 88-144s on
+# "what's my IP"). Composite queries are now classified "medium" (T2) and stay deep.
+enable_fast_path_routing = true
+
+# §7 — library-ready naming + replay bundle
+enable_suggested_naming_llm = true
+
+# §2 — single capability surface for the planner
+enable_capability_lookup = true
+enable_skill_discovery = true
+
+# Memory off until the user opts in
+enable_memory = false
+enable_memory_research = false
+enable_web_research = false
+
+# Ecosystem-write features (§4 P2, §5) off — opt-in via CARE settings
+enable_skill_provenance_save = false
+enable_reusable_step_save = false
+enable_failure_card_save = false
+enable_evolution_meta_save = false
+enable_intermediate_artifact_save = false
+
+max_retries = 2

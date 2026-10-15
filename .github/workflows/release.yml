@@ -1,0 +1,85 @@
+name: Release to PyPI
+
+# Runs only after the CI workflow (lint + tests) finishes successfully on
+# main. If CI was green and the pyproject version isn't on PyPI yet, build
+# and publish `mmar-mage`. Tests therefore always gate the release.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  check-version:
+    # Skip entirely unless the triggering CI run passed.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ${{ fromJSON(vars.CI_RUNNERS || '{}')['ubuntu-latest'] || 'ubuntu-latest' }}
+    outputs:
+      should_publish: ${{ steps.check.outputs.should_publish }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Build/inspect the exact commit CI tested, not the branch tip.
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Check whether version is already on PyPI
+        id: check
+        run: |
+          version=$(grep -m1 '^version = ' pyproject.toml | sed -E 's/version = "(.*)"/\1/')
+          echo "pyproject version: $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/mmar-mage/$version/json")
+          echo "PyPI lookup HTTP status: $status"
+          case "$status" in
+            200)
+              echo "Version $version already on PyPI — nothing to publish."
+              echo "should_publish=false" >> "$GITHUB_OUTPUT"
+              ;;
+            404)
+              echo "Version $version not on PyPI — will publish."
+              echo "should_publish=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unexpected status $status from PyPI; refusing to guess." >&2
+              exit 1
+              ;;
+          esac
+
+  release:
+    needs: check-version
+    if: needs.check-version.outputs.should_publish == 'true'
+    runs-on: ${{ fromJSON(vars.CI_RUNNERS || '{}')['ubuntu-latest'] || 'ubuntu-latest' }}
+    permissions:
+      contents: write  # push the v<version> tag
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade build
+
+      - name: Build sdist + wheel
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Tag the release
+        run: |
+          version="${{ needs.check-version.outputs.version }}"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null 2>&1; then
+            echo "Tag v$version already exists — skipping."
+          else
+            git tag "v$version"
+            git push origin "v$version"
+          fi

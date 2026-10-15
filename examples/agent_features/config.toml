@@ -1,0 +1,20 @@
+[mage]
+# Generation profile for the agent-features pipeline:
+#  - skill discovery surfaces the official PDF / DOCX / etc. skills
+#  - checkpoint marking → default RE-PLAN policy attached
+#  - all the deep-mode stages run end-to-end
+mode = "deep"
+model = "gpt-4o"
+temperature = 0.2
+enable_memory = false
+enable_memory_research = false
+enable_web_research = false
+
+# --- agent-features ---
+enable_skill_discovery = true
+skill_discovery_max_recommendations = 3
+enable_skill_web_discovery = false   # set true + provide web_search_api_key to discover unknown skills
+
+enable_replan_generation = true
+replan_max_replans = 3
+replan_action_on_failure = "replan_from_checkpoint"

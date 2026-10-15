@@ -1,0 +1,52 @@
+[evaluation]
+# OpenRouter API key — set here or via OPENROUTER_API_KEY env var
+api_key = ""
+base_url = "https://openrouter.ai/api/v1"
+
+# MAGE generation settings
+mage_mode = "deep"
+temperature = 0.2
+
+# Generation models (used to create CARL chains)
+generation_models = [
+    "deepseek/deepseek-v3.2",
+    "minimax/minimax-m2.7",
+    "z-ai/glm-5.1",
+    "moonshotai/kimi-k2.5",
+]
+
+# Execution models (≤15B) — run MAGE chains AND baseline prompts on benchmark tasks
+execution_models = [
+    "qwen/qwen3.5-9b",
+    "meta-llama/llama-3.3-8b-instruct",
+    "microsoft/phi-4",
+    "mistralai/ministral-3b-2512",
+]
+
+# Baseline prompt strategies
+baseline_types = ["zero_shot", "cot", "plan_and_solve"]
+
+# Benchmarks to include
+benchmarks = ["hover", "ifbench", "hotpotqa", "livebench_math"]
+
+# Output directory for generated artifacts
+output_dir = "evaluation/results"
+
+# Chain generation mode
+# "category" — one abstract chain per benchmark (correct for experiments)
+# "per_task" — one chain per question (legacy, may leak answers)
+chain_mode = "category"
+category_example_count = 5
+contamination_check_enabled = true
+
+# Restrict chains to LLM-only steps (no tools, MCP, eval, etc.)
+# Useful when execution models cannot call tools
+allowed_step_types = ["llm"]
+
+# Real LLM baseline execution
+execute_baselines = true
+baseline_max_tokens = 2048
+baseline_concurrency = 5
+
+# Uncomment to limit tasks per benchmark (useful for quick testing)
+# max_tasks_per_benchmark = 2

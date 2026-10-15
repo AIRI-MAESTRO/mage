@@ -1,0 +1,12 @@
+[mage]
+provider = "openrouter"
+base_url = "https://openrouter.ai/api/v1"
+model = "anthropic/claude-3.5-sonnet"
+temperature = 0.2
+mode = "deep"
+openrouter_site_url = "https://github.com/Glazkoff/carl-mage"
+openrouter_app_name = "carl-mage"
+
+[mage.stage_llm_overrides]
+domain_analysis = { model = "openai/gpt-4o-mini", temperature = 0.0 }
+step_planning   = { model = "anthropic/claude-3.5-sonnet", temperature = 0.2 }

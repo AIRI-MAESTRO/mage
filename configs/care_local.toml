@@ -1,0 +1,52 @@
+# CARE-local — for CARE running against a local LLM (Ollama, vLLM,
+# llama.cpp HTTP, AIRI inference server). Auto-detects the running
+# model via `/v1/models` and turns on the json-mode fallback so we
+# don't depend on `response_format=json_object` honoring.
+#
+# Streaming + retry visibility kept on (CARE's TUI wants both).
+# All ecosystem-save and research flags OFF — running locally usually
+# means no memory server is configured.
+
+[mage]
+provider = "local"
+base_url = "http://localhost:11434/v1"
+api_key = "EMPTY"
+model = "__auto__"
+temperature = 0.2
+mode = "deep"
+
+# §6 P2 — json_mode_fallback auto-resolves to True for provider="local",
+# but be explicit so the file documents the intent.
+json_mode_fallback = true
+
+# T38 — schema-guided decoding is IGNORED on the json_mode_fallback path (no
+# response_format is sent), so keep it off here. Quality gates + replan off too —
+# a lightweight local profile.
+use_schema_constrained_output = false
+enable_replan_generation = false
+enable_step_critique = false
+enable_chain_verification = false
+
+# T44 — auto step-describe: a long chain on this no-guided-decoding local profile
+# is described one step per call (a single batch JSON reply tends to break).
+step_describe_mode = "auto"
+
+# §3 — TUI streaming + retry visibility
+enable_streaming = true
+
+# §7 — library-ready naming. Heuristic only by default (no LLM round-trip
+# spent on naming) — flip to True if the local model handles it well.
+enable_suggested_naming_llm = false
+
+# §2 — capability lookup + skill discovery still useful even locally
+enable_capability_lookup = true
+enable_skill_discovery = true
+# No web fallback locally
+enable_skill_web_discovery = false
+
+enable_memory = false
+enable_memory_research = false
+enable_web_research = false
+
+# Local models tend to be flakier — give them an extra retry.
+max_retries = 3

@@ -1,0 +1,10 @@
+[mage]
+mode = "deep"
+model = "gpt-4o"
+temperature = 0.2
+enable_memory = false
+enable_memory_research = false
+enable_web_research = true
+web_search_provider = "tavily"
+web_research_max_results = 5
+web_research_sub_queries = 2

@@ -1,0 +1,11 @@
+[mage]
+provider = "local"
+base_url = "https://inference.airi.net:46783/v1"
+api_key = "YOUR_AIRI_API_KEY"
+model = "__auto__"
+ssl_verify = false
+http_timeout = 120.0
+temperature = 0.2
+mode = "deep"
+enable_memory_research = true
+enable_web_research = false

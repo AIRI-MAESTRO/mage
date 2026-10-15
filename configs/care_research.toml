@@ -1,0 +1,70 @@
+# CARE-research — power-user preset for "I want every signal MAGE can
+# give me". Turns on memory research, web research, the full skill
+# discovery surface, and every ecosystem-save flag (§4 P2, §5 P1+P2,
+# §7) so the platform's evolution engine and audit UI have maximum
+# data to work with.
+#
+# Requires:
+#   - `web_search_api_key` to be supplied (env var MAGE_WEB_SEARCH_API_KEY
+#     picks it up via `MAGEConfig.from_env`, or set inline below).
+#   - A reachable gigaevo-memory server at memory_base_url.
+#
+# Expect 8-12 LLM calls per generation (vs. 4 in care_default) because
+# memory + web sub-queries + cold-start scoring + verification + refine
+# all add round-trips.
+
+[mage]
+provider = "openai"
+model = "gpt-4o"
+temperature = 0.2
+mode = "deep"
+
+# §3 — full TUI
+enable_streaming = true
+
+# P-7 / T9 — schema-guided decoding for structured stages where supported;
+# degrades to json_object automatically if the runtime model can't honor it.
+use_schema_constrained_output = true
+
+# §7 — library-ready naming via LLM
+enable_suggested_naming_llm = true
+
+# §2 — every capability source on
+enable_capability_lookup = true
+enable_skill_discovery = true
+enable_memory_skill_lookup = true
+enable_local_skill_catalog = true
+# web fallback when registry can't find a match
+enable_skill_web_discovery = true
+
+# Memory + research
+enable_memory = true
+enable_memory_research = true
+memory_recall_top_k = 5
+memory_relevance_threshold = 0.4
+cold_start_candidates = 3
+enable_web_research = true
+web_search_provider = "tavily"
+
+# Quality enhancements
+enable_step_critique = true
+enable_chain_verification = true
+enable_self_refine = true
+max_refine_iterations = 3
+refine_quality_threshold = 0.85
+
+# T38 — replan made explicit; stays off until T10 lands the default
+# retry_with_feedback → replan_from_checkpoint policy + describer checkpoints.
+enable_replan_generation = false
+
+# Feedback loop
+enable_feedback_loop = true
+
+# §4 P2 + §5 — full ecosystem persistence (audit + evolution priors)
+enable_skill_provenance_save = true
+enable_reusable_step_save = true
+enable_failure_card_save = true
+enable_evolution_meta_save = true
+enable_intermediate_artifact_save = true
+
+max_retries = 2
